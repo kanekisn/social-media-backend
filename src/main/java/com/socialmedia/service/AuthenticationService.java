@@ -6,6 +6,7 @@ import com.socialmedia.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,15 +45,16 @@ public class AuthenticationService {
     }
 
     public User authenticate(LoginUserDto input) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getUsername(),
                         input.getPassword()
                 )
         );
 
-        return userRepository.findByUsername(input.getUsername())
-                .orElseThrow();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        return (User) userDetails;
     }
 
     public UserDetails loadUserByUsername(String username) {

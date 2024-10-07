@@ -21,7 +21,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "users_seq", allocationSize = 1)
     @Column(nullable = false)
-    private Integer id;
+    private Long id;
 
     private String firstName;
 
@@ -31,7 +31,7 @@ public class User implements UserDetails {
 
     private String city;
 
-    private Integer subscriptionAmount;
+    private Long subscriptionAmount;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_stack", joinColumns = @JoinColumn(name = "user_id"))
