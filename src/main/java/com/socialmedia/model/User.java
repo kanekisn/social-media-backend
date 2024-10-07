@@ -33,7 +33,7 @@ public class User implements UserDetails {
 
     private Long subscriptionAmount;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_stack", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "stack_item")
     private List<String> stack;
