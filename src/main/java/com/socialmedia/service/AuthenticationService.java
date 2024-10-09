@@ -39,6 +39,7 @@ public class AuthenticationService {
         user.setUsername(input.getUsername());
         user.setCity(input.getCity());
         user.setStack(input.getStack());
+        user.setDescription(input.getDescription());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
 
         return userRepository.save(user);

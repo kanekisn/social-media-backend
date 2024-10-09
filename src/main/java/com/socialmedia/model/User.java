@@ -31,9 +31,11 @@ public class User implements UserDetails {
 
     private String city;
 
+    private String description;
+
     private Long subscriptionAmount;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_stack", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "stack_item")
     private List<String> stack;

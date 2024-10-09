@@ -15,6 +15,8 @@ public class RegisterUserDto {
 
     private String lastName;
 
+    private String description;
+
     private String city;
 
     private List<String> stack;
