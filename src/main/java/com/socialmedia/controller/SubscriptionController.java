@@ -4,6 +4,8 @@ import com.socialmedia.dto.UserDto;
 import com.socialmedia.model.User;
 import com.socialmedia.service.SubscriptionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -31,8 +33,17 @@ public class SubscriptionController {
     }
 
     @GetMapping("/{userId}/followers")
-    public ResponseEntity<Set<UserDto>> getFollowers(@PathVariable Long userId) {
+    public ResponseEntity<Set<UserDto>> getFollowersById(@PathVariable Long userId) {
         Set<User> followers = subscriptionService.getFollowers(userId);
+        return getSetResponseEntity(followers);
+    }
+
+    @GetMapping("/me/followers")
+    public ResponseEntity<Set<UserDto>> getMyFollowers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+        Set<User> followers = subscriptionService.getFollowers(currentUser.getId());
         return getSetResponseEntity(followers);
     }
 
