@@ -18,4 +18,12 @@
         <sqlFile path="classpath:db/changelog/add-description-to-users.sql" />
     </changeSet>
 
+    <changeSet id="4" author="AL">
+        <sqlFile path="classpath:db/changelog/4-create-subscriptions.sql" />
+    </changeSet>
+
+    <changeSet id="5" author="AL">
+        <sqlFile path="classpath:db/changelog/add-default-value-to-subscription-amount.sql" />
+    </changeSet>
+
 </databaseChangeLog>

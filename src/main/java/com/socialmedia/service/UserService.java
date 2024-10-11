@@ -24,7 +24,7 @@ public class UserService {
     }
 
     public List<String> getUserStack(User user) {
-        return userRepository.findById(user.getId().intValue())
+        return userRepository.findById(user.getId())
                 .map(User::getStack)
                 .orElse(Collections.emptyList());
     }
