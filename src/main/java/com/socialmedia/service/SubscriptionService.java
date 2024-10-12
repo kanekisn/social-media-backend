@@ -51,13 +51,13 @@ public class SubscriptionService {
     }
 
     public Set<User> getFollowers(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithFollowers(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return user.getFollowers();
     }
 
     public Set<User> getFollowing(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithFollowing(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return user.getFollowing();
     }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,13 +19,7 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(userRepository.findAll());
-    }
-
-    public List<String> getUserStack(User user) {
-        return userRepository.findById(user.getId())
-                .map(User::getStack)
-                .orElse(Collections.emptyList());
+        return new ArrayList<>(userRepository.findAllUsersWithStack());
     }
 
     @Transactional

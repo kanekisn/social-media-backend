@@ -42,7 +42,7 @@ public class UserController {
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setCity(user.getCity());
-        userResponse.setStack(userService.getUserStack(user));
+        userResponse.setStack(user.getStack());
         userResponse.setSubscriptionAmount(user.getSubscriptionAmount());
         userResponse.setDescription(user.getDescription());
         userResponse.setAvatarUrl(user.getAvatarUrl());
