@@ -1,23 +1,30 @@
 package com.socialmedia.controller;
 
-import com.socialmedia.dto.UserDto;
+import com.socialmedia.dto.UserHateoasDto;
 import com.socialmedia.model.User;
 import com.socialmedia.service.SubscriptionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api/v1/users")
 public class SubscriptionController {
-    private final SubscriptionService subscriptionService;
 
-    public SubscriptionController(SubscriptionService subscriptionService) {
+    private final SubscriptionService subscriptionService;
+    private final PagedResourcesAssembler<User> pagedResourcesAssembler;
+
+    public SubscriptionController(SubscriptionService subscriptionService,
+                                  PagedResourcesAssembler<User> pagedResourcesAssembler) {
         this.subscriptionService = subscriptionService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @PostMapping("/{userId}/follow/{userToFollowId}")
@@ -33,39 +40,61 @@ public class SubscriptionController {
     }
 
     @GetMapping("/{userId}/followers")
-    public ResponseEntity<Set<UserDto>> getFollowersById(@PathVariable Long userId) {
-        Set<User> followers = subscriptionService.getFollowers(userId);
-        return getSetResponseEntity(followers);
+    public ResponseEntity<PagedModel<UserHateoasDto>> getFollowersById(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> followersPage = subscriptionService.getFollowers(userId, pageable);
+        PagedModel<UserHateoasDto> followersDtoPage = pagedResourcesAssembler.toModel(followersPage, this::convertToDto);
+
+        return ResponseEntity.ok(followersDtoPage);
     }
 
     @GetMapping("/me/followers")
-    public ResponseEntity<Set<UserDto>> getMyFollowers() {
+    public ResponseEntity<PagedModel<UserHateoasDto>> getMyFollowers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
 
-        Set<User> followers = subscriptionService.getFollowers(currentUser.getId());
-        return getSetResponseEntity(followers);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> followersPage = subscriptionService.getFollowers(currentUser.getId(), pageable);
+        PagedModel<UserHateoasDto> followersDtoPage = pagedResourcesAssembler.toModel(followersPage, this::convertToDto);
+
+        return ResponseEntity.ok(followersDtoPage);
     }
 
     @GetMapping("/{userId}/following")
-    public ResponseEntity<Set<UserDto>> getFollowing(@PathVariable Long userId) {
-        Set<User> following = subscriptionService.getFollowing(userId);
-        return getSetResponseEntity(following);
+    public ResponseEntity<PagedModel<UserHateoasDto>> getFollowing(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> followingPage = subscriptionService.getFollowing(userId, pageable);
+        PagedModel<UserHateoasDto> followingDtoPage = pagedResourcesAssembler.toModel(followingPage, this::convertToDto);
+
+        return ResponseEntity.ok(followingDtoPage);
     }
 
-    private ResponseEntity<Set<UserDto>> getSetResponseEntity(Set<User> following) {
-        Set<UserDto> followingDTOS = following.stream()
-                .map(user -> {
-                    UserDto userDto = new UserDto();
-                    userDto.setId(user.getId());
-                    userDto.setFirstName(user.getFirstName());
-                    userDto.setLastName(user.getLastName());
-                    userDto.setCity(user.getCity());
-                    userDto.setAvatarUrl(user.getAvatarUrl());
-                    userDto.setStack(user.getStack());
-                    return userDto;
-                })
-                .collect(Collectors.toSet());
-        return ResponseEntity.ok(followingDTOS);
+    private UserHateoasDto convertToDto(User user) {
+        UserHateoasDto userDto = new UserHateoasDto();
+        userDto.setId(user.getId());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setCity(user.getCity());
+        userDto.setAvatarUrl(user.getAvatarUrl());
+
+        userDto.add(WebMvcLinkBuilder.linkTo(
+                        WebMvcLinkBuilder.methodOn(SubscriptionController.class).getFollowersById(user.getId(), 0, 10))
+                .withRel("followers"));
+        userDto.add(WebMvcLinkBuilder.linkTo(
+                        WebMvcLinkBuilder.methodOn(SubscriptionController.class).getFollowing(user.getId(), 0, 10))
+                .withRel("following"));
+
+        return userDto;
     }
 }

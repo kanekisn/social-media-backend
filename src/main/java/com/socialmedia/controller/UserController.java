@@ -35,6 +35,13 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("get-user/{id}")
+    public ResponseEntity<UserResponse> getAllUsers(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+
+        return ResponseEntity.ok(userResponseFactory(user));
+    }
+
     private UserResponse userResponseFactory(User user) {
         UserResponse userResponse = new UserResponse();
         userResponse.setId(user.getId());

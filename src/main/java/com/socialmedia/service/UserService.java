@@ -3,6 +3,7 @@ package com.socialmedia.service;
 import com.socialmedia.dto.UserDto;
 import com.socialmedia.model.User;
 import com.socialmedia.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,10 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return new ArrayList<>(userRepository.findAllUsersWithStack());
+    }
+
+    public User getUserById(Long id) {
+        return this.userRepository.findUserById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Transactional

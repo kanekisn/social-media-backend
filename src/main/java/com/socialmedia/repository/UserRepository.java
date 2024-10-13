@@ -1,6 +1,8 @@
 package com.socialmedia.repository;
 
 import com.socialmedia.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -15,12 +17,15 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @EntityGraph(attributePaths = {"stack"})
     Optional<User> findByUsername(String username);
 
+    @EntityGraph(attributePaths = {"stack"})
+    Optional<User> findUserById(Long userId);
+
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.stack")
     List<User> findAllUsersWithStack();
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.followers WHERE u.id = :userId")
-    Optional<User> findByIdWithFollowers(@Param("userId") Long userId);
+    @Query("SELECT f FROM User u JOIN u.followers f WHERE u.id = :userId")
+    Page<User> findByIdWithFollowers(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.following LEFT JOIN FETCH u.stack WHERE u.id = :userId")
-    Optional<User> findByIdWithFollowing(@Param("userId") Long userId);
+    @Query("SELECT f FROM User u JOIN u.following f WHERE u.id = :userId")
+    Page<User> findByIdWithFollowing(@Param("userId") Long userId, Pageable pageable);
 }

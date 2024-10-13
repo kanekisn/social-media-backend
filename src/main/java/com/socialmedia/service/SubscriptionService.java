@@ -2,11 +2,13 @@ package com.socialmedia.service;
 
 import com.socialmedia.model.User;
 import com.socialmedia.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class SubscriptionService {
@@ -50,15 +52,24 @@ public class SubscriptionService {
         }
     }
 
-    public Set<User> getFollowers(Long userId) {
-        User user = userRepository.findByIdWithFollowers(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return user.getFollowers();
+    public Page<User> getFollowers(Long userId, Pageable pageable) {
+        return validatePage(
+                userRepository.findByIdWithFollowers(userId, pageable)
+        );
     }
 
-    public Set<User> getFollowing(Long userId) {
-        User user = userRepository.findByIdWithFollowing(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return user.getFollowing();
+    public Page<User> getFollowing(Long userId, Pageable pageable) {
+        return validatePage(
+                userRepository.findByIdWithFollowing(userId, pageable)
+        );
+    }
+
+    private Page<User> validatePage(Page<User> page) {
+        if (page.isEmpty() && page.getPageable().getPageNumber() > 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Page number out of bounds"
+            );
+        }
+        return page;
     }
 }
