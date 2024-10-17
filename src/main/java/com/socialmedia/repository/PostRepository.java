@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends CrudRepository<Post, Long> {
-    @Query("SELECT p, COUNT(c) AS commentCount, COUNT(l) AS likeCount " +
+    @Query("SELECT p, COUNT(DISTINCT c.id) AS commentCount, COUNT(DISTINCT l.id) AS likeCount " +
             "FROM Post p " +
             "LEFT JOIN Comment c ON p.id = c.post.id " +
             "LEFT JOIN Like l ON p.id = l.post.id " +
