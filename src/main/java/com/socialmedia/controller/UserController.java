@@ -67,13 +67,4 @@ public class UserController {
 
         return userResponse;
     }
-
-    @PatchMapping("update")
-    public ResponseEntity<String> updateUser(@RequestBody UserDto userDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        userService.updateUser(userDto, currentUser);
-
-        return ResponseEntity.ok("User updated successfully");
-    }
 }

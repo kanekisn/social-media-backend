@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -34,18 +33,6 @@ public class UserService {
         user.setCity(userDto.getCity());
         user.setStack(userDto.getStack());
         user.setDescription(userDto.getDescription());
-        userRepository.save(user);
-    }
-
-    @Transactional
-    public void updateUser(UserDto userDto, User user) {
-        Optional.ofNullable(userDto.getFirstName()).ifPresent(user::setFirstName);
-        Optional.ofNullable(userDto.getLastName()).ifPresent(user::setLastName);
-        Optional.ofNullable(userDto.getAvatarUrl()).ifPresent(user::setAvatarUrl);
-        Optional.ofNullable(userDto.getCity()).ifPresent(user::setCity);
-        Optional.ofNullable(userDto.getStack()).ifPresent(user::setStack);
-        Optional.ofNullable(userDto.getDescription()).ifPresent(user::setDescription);
-
         userRepository.save(user);
     }
 }
