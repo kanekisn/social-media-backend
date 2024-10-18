@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import static com.socialmedia.utils.assemblers.ConvertToDto.convertToDto;
@@ -30,6 +31,7 @@ public class CommentService {
         return commentRepository.findAllByPostId(postId, pageable);
     }
 
+    @Transactional
     public ResponseEntity<CommentDto> addComment(String content, Long postId, User user) {
         Comment comment = new Comment();
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пост не найден"));

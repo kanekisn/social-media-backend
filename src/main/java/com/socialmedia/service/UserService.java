@@ -28,6 +28,16 @@ public class UserService {
     }
 
     @Transactional
+    public void patchUser(UserDto userDto, User user) {
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setCity(userDto.getCity());
+        user.setStack(userDto.getStack());
+        user.setDescription(userDto.getDescription());
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void updateUser(UserDto userDto, User user) {
         Optional.ofNullable(userDto.getFirstName()).ifPresent(user::setFirstName);
         Optional.ofNullable(userDto.getLastName()).ifPresent(user::setLastName);

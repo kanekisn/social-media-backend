@@ -29,6 +29,17 @@ public class UserController {
         return ResponseEntity.ok(userResponseFactory(user));
     }
 
+    @PatchMapping("me")
+    public ResponseEntity<?> patchUser(@RequestBody UserDto userDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User user = (User) authentication.getPrincipal();
+
+        userService.patchUser(userDto, user);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> result = userService.getAllUsers().stream().map(this::userResponseFactory).toList();

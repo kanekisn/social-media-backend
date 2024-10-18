@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class PostService {
         this.likeRepository = likeRepository;
     }
 
-
+    @Transactional
     public ResponseEntity<PostDto> addPost(String content, User user) {
         Post post = new Post();
         post.setAuthor(user);
@@ -54,6 +55,7 @@ public class PostService {
         return ResponseEntity.status(HttpStatus.CREATED).body(postDto);
     }
 
+    @Transactional
     public void likePost(Long postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пост не найден"));
         if (!likeRepository.existsByPostAndUser(post, user)) {
@@ -64,6 +66,7 @@ public class PostService {
         }
     }
 
+    @Transactional
     public void unlikePost(Long postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пост не найден"));
         Like like = likeRepository.findByPostAndUser(post, user).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Лайк не найден"));
