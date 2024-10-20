@@ -27,6 +27,12 @@ public class UserService {
     }
 
     @Transactional
+    public void updateAvatar(User user, String avatarUrl) {
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void patchUser(UserDto userDto, User user) {
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());

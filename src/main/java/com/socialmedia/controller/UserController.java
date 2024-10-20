@@ -4,16 +4,25 @@ import com.socialmedia.dto.UserDto;
 import com.socialmedia.model.User;
 import com.socialmedia.response.UserResponse;
 import com.socialmedia.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @RequestMapping("api/v1/users/")
 @RestController
 public class UserController {
+
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -51,6 +60,44 @@ public class UserController {
         User user = userService.getUserById(id);
 
         return ResponseEntity.ok(userResponseFactory(user));
+    }
+
+    @PostMapping("upload-avatar")
+    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal User currentUser) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String filename = file.getOriginalFilename();
+
+        if (filename == null || (!filename.endsWith(".png") && !filename.endsWith(".jpg") && !filename.endsWith(".jpeg"))) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            String UPLOAD_DIR = "src/main/resources/static/uploads/";
+
+            String extension = filename.substring(filename.lastIndexOf("."));
+            String newFileName = UUID.randomUUID() + extension;
+            Path path = Paths.get(UPLOAD_DIR + newFileName);
+
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            System.out.println("Файл сохранён по пути: " + path.toAbsolutePath());
+
+            Files.write(path, file.getBytes());
+
+            String fileUrl = "http://localhost:8080/uploads/" + newFileName;
+
+            userService.updateAvatar(currentUser, fileUrl);
+
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private UserResponse userResponseFactory(User user) {
