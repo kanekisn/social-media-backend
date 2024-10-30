@@ -37,4 +37,12 @@
         <sqlFile path="classpath:db/changelog/1-create-likes.sql" />
     </changeSet>
 
+    <changeSet id="9" author="AL">
+        <sqlFile path="classpath:db/changelog/1-chats_and_messages.sql" />
+    </changeSet>
+
+    <changeSet id="10" author="AL">
+        <sqlFile path="classpath:db/changelog/1-last-message-fields.sql" />
+    </changeSet>
+
 </databaseChangeLog>
