@@ -1,9 +1,15 @@
 package com.socialmedia.controller;
 
 import com.socialmedia.dto.UserDto;
+import com.socialmedia.dto.UserSearchDto;
 import com.socialmedia.model.User;
 import com.socialmedia.response.UserResponse;
 import com.socialmedia.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,9 +30,11 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final PagedResourcesAssembler<UserDto> pagedResourcesAssembler;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PagedResourcesAssembler<UserDto> pagedResourcesAssembler) {
         this.userService = userService;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping("me")
@@ -53,6 +61,16 @@ public class UserController {
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> result = userService.getAllUsers().stream().map(this::userResponseFactory).toList();
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<PagedModel<EntityModel<UserDto>>> searchUsers(
+            Pageable pageable,
+            @RequestBody UserSearchDto userSearchDto) {
+        Page<UserDto> users = userService.searchUsers(userSearchDto.getUsername(), userSearchDto.getStack(), pageable);
+        PagedModel<EntityModel<UserDto>> messageModels = pagedResourcesAssembler.toModel(users);
+
+        return ResponseEntity.ok(messageModels);
     }
 
     @GetMapping("get-user/{id}")
@@ -85,8 +103,6 @@ public class UserController {
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
-
-            System.out.println("Файл сохранён по пути: " + path.toAbsolutePath());
 
             Files.write(path, file.getBytes());
 

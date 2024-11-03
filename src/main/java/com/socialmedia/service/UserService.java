@@ -3,11 +3,14 @@ package com.socialmedia.service;
 import com.socialmedia.dto.UserDto;
 import com.socialmedia.model.User;
 import com.socialmedia.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -24,6 +27,13 @@ public class UserService {
 
     public User getUserById(Long id) {
         return this.userRepository.findUserById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public Page<UserDto> searchUsers(String username, String stack, Pageable pageable) {
+        List<String> convertedStack = Arrays.asList(stack.toLowerCase().split("[\\W_]+"));
+        Page<User> users = userRepository.searchUsers(username, convertedStack, pageable);
+
+        return users.map(UserDto::fromEntity);
     }
 
     @Transactional

@@ -20,6 +20,13 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @EntityGraph(attributePaths = {"stack"})
     Optional<User> findUserById(Long userId);
 
+    @Query("SELECT u FROM User u LEFT JOIN u.stack s " +
+            "WHERE (:username IS NULL OR u.username LIKE %:username%) " +
+            "OR (:stack IS NULL OR s IN :stack)")
+    Page<User> searchUsers(@Param("username") String username,
+                           @Param("stack") List<String> stack,
+                           Pageable pageable);
+
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.stack")
     List<User> findAllUsersWithStack();
 
