@@ -1,5 +1,6 @@
 package com.socialmedia.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 
 @Table(name = "users")
@@ -16,7 +19,10 @@ import java.util.*;
 @Getter
 @Setter
 @BatchSize(size = 20)
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "users_seq", allocationSize = 1)
@@ -54,6 +60,7 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "subscriptions",
@@ -62,6 +69,7 @@ public class User implements UserDetails {
     )
     private Set<User> following = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "following")
     private Set<User> followers = new HashSet<>();
 

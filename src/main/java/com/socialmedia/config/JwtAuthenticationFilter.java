@@ -1,5 +1,7 @@
 package com.socialmedia.config;
 
+import com.socialmedia.model.User;
+import com.socialmedia.service.UserCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,13 +24,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserCacheService userCacheService;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
-            UserDetailsService userDetailsService
+            UserDetailsService userDetailsService,
+            UserCacheService userCacheService
     ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.userCacheService = userCacheService;
     }
 
     @Override
@@ -51,7 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails = this.userCacheService.getCachedUser(userEmail);
+
+                if(userDetails == null) {
+                    userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                    this.userCacheService.cacheUser((User) userDetails);
+                }
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
